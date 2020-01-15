@@ -61,7 +61,7 @@
 % if ( $Dirty ) {
 <input type="submit" class="button" name="SavedSearchRevert" value="<%loc('Revert')%>" />
 % }
-<input type="submit" class="button" name="SavedSearchDelete" value="<%loc('Delete')%>" />
+<input type="submit" class="button <% $Object->DependedOnBy->Count ? 'confirm' : '' %>" name="SavedSearchDelete" value="<%loc('Delete')%>" />
 % if ( $AllowCopy ) {
 <input type="submit" class="button" name="SavedSearchCopy"   value="<%loc('Save as New')%>" />
 % }
@@ -81,6 +81,31 @@
 
 </&>
 </div>
+
+% if ( $Object && $Object->Id && $Object->DependedOnBy->Count ) {
+    <div class="delete-confirm hidden">
+      <p>
+        <&|/l&>This search is used in these dashboards/homepages, really delete?</&>
+      </p>
+      <ul>
+% my $links = $Object->DependedOnBy;
+% while ( my $link = $links->Next ) {
+        <li>
+% if ( $link->BaseObj->Name eq 'Dashboard' ) {
+          <a href="<% $link->BaseURI->Resolver->HREF %>" target="_blank"><% $link->BaseURI->AsString %></a>
+% } elsif ( $link->BaseObj->ObjectType eq 'RT::System' ) {
+          <% loc('Global') %>
+% } elsif ( $link->BaseObj->ObjectType eq 'RT::User' ) {
+          <% loc('User') %>: <& /Elements/ShowUser, User => $link->BaseObj->Object, LinkTarget => '_blank' &>
+% } else {
+          <% $link->BaseObj->ObjectType %>: #<% $link->BaseObj->ObjectId %>
+% }
+        </li>
+% }
+      </ul>
+      <& /Elements/Submit, Name => 'SavedSearchDelete', Label => loc('Delete') &>
+    </div>
+% }
 <%INIT>
 return unless $session{'CurrentUser'}->HasRight(
     Right  => 'LoadSavedSearch',
@@ -175,6 +200,7 @@ if ( $ARGS{'SavedSearchLoad'} ) {
         } else {
             push @results, loc('Loaded saved search "[_1]"', $SavedSearch->{'Description'} );
         }
+        push @results, loc('This search is used in dashboards/homepages.') if $search->DependedOnBy->Count;
     }
     else {
         push @results, loc( 'Can not load saved search "[_1]"',
