@@ -73,14 +73,16 @@ if ( RT->Config->Get('EnableJSChart') || !RT->Config->Get('DisableGD') ) {
     $session{'i'}++;
 }
 
+my( $chart_type ) = ($ChartStyle || '') =~ /\b(pie|bar|line)\b/;
+
 </%init>
 <div class="chart-wrapper">
   <div class="form-row">
     <div class="col-auto mx-auto">
       <div class="form-row">
         <div class="col-auto">
-% if ( ($ChartStyle || '') =~ /\b(pie|bar|line)\b/ ) {
-          <div class="chart image <% $1 %> w-auto">
+% if ( $chart_type ) {
+          <div class="chart image <% $chart_type %> w-auto">
 % if ( RT->Config->Get('EnableJSChart', $session{CurrentUser}) ) {
             <& /Search/JSChart, Cache => $key, %ARGS, GroupBy => \@GroupBy &>
 % } elsif (RT->Config->Get('DisableGD')) {
@@ -91,7 +93,7 @@ if ( RT->Config->Get('EnableJSChart') || !RT->Config->Get('DisableGD') ) {
           </div>
 % }
         </div>
-        <div class="col-auto chart-table-wrapper">
+        <div class="col-auto chart-table-wrapper <%  $chart_type %>">
 % if ( ($ChartStyle || '') =~ /\btable\b/ ) {
           <& ChartTable, %ARGS, Table => { $report->FormatTable( %columns ) } &>
 % }
