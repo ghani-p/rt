@@ -2722,11 +2722,40 @@ Set($EnablePriorityAsString, 1);
 =item C<%PriorityAsString>
 
 Specify a mapping between priority strings and the internal numeric
-representation
+representation. E.g.
+
+    Set(%PriorityAsString,
+        Default => { Low => 0, Medium => 50, High => 100 },
+        General => [ Medium => 50, Low => 0, High => 100 ],
+        Support => 0,
+    );
+
+Key is queue name or "Default", which is the fallback for unspecified
+queues. Values could be ArrayRef or HashRef or C<0>.
+
+=over
+
+=item ArrayRef
+
+This is the ordered String => Number map list. Pririty options will be
+rendered in the same order.
+
+=item HashRef
+
+This is the unordered String => Number map list. Priority options will be
+rendered in numerical ascending order.
+
+=item C<0>
+
+This is to render priorities as numbers.
+
+=back
 
 =cut
 
-Set(%PriorityAsString, (Low => 0, Medium => 50, High => 100));
+Set(%PriorityAsString,
+    Default => { Low => 0, Medium => 50, High => 100 },
+);
 
 =back
 
