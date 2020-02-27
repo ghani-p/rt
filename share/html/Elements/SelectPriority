@@ -51,6 +51,7 @@ $Name => 'Priority'
 $Default => ''
 $QueueObj => undef
 %Queues => ()
+$ValueAsString => undef
 </%ARGS>
 <%INIT>
 use List::MoreUtils 'uniq';
@@ -89,7 +90,8 @@ if ( RT->Config->Get('EnablePriorityAsString') ) {
     }
 
     my @options;
-    my %map;
+    my %label_value_map;
+    my %value_label_map;
 
     # Items in @values are hashrefs/arrayrefs, we still can de-duplicate
     # using uniq because duplicated ones are totally identical.
@@ -103,17 +105,30 @@ if ( RT->Config->Get('EnablePriorityAsString') ) {
         }
 
         while ( my $label = shift @list ) {
-            my $option = { Label => $label, Value => shift @list };
-            if ( defined $map{$label} ) {
-                if ( $map{$label} != $option->{Value} ) {
+            my $value = shift @list;
+            my $option = { Label => $label, Value => $value };
+
+            if ( defined $label_value_map{$label} ) {
+                if ( $label_value_map{$label} != $value ) {
                     $use_numeric = 1;
                     last;
                 }
+
+                if ( $ValueAsString && $value_label_map{$value} ne $label ) {
+                    $ValueAsString = 0;
+                }
             }
             else {
-                $map{$label} = $option->{Value};
+                $label_value_map{$label} = $value;
+                $value_label_map{$value} = $label;
                 push @options, $option;
             }
+        }
+    }
+
+    if ($ValueAsString) {
+        for my $option (@options) {
+            $option->{Value} = $option->{Label};
         }
     }
 

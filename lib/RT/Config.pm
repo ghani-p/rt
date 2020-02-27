@@ -1389,6 +1389,7 @@ our %META;
             my $config = $self->Get('PriorityAsString');
 
             my %label_value_map;
+            my %value_label_map;
 
             for my $name ( keys %$config ) {
                 if ( my $value = $config->{$name} ) {
@@ -1412,9 +1413,15 @@ our %META;
                                 RT->Logger->debug(
                                     "Priority $label is inconsistent: $label_value_map{$label} VS $value");
                             }
+
+                            if ( $value_label_map{$value} ne $label ) {
+                                RT->Logger->debug(
+                                    "Priority $value is inconsistent: $value_label_map{$value} VS $label");
+                            }
                         }
                         else {
                             $label_value_map{$label} = $value;
+                            $value_label_map{$value} = $label;
                         }
                     }
 
