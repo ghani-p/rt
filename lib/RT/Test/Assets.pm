@@ -97,7 +97,6 @@ sub load_or_create_catalog {
     return $obj;
 }
 
-
 sub create_asset {
     my %info  = @_;
     my $asset = RT::Asset->new( RT->SystemUser );
