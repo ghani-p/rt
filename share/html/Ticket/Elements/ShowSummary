@@ -227,7 +227,11 @@ $InlineEdit => 0
 my $can_modify = $Ticket->CurrentUserHasRight('ModifyTicket');
 my $can_modify_cf = $Ticket->CurrentUserHasRight('ModifyCustomField');
 my $can_modify_basics = $can_modify || $can_modify_cf;
-my $can_modify_people = $Ticket->CurrentUserCanSetOwner();
+
+# contrary to other methods, CurrentUserCanSetOwner does not return a boolen
+my ( $can_set_owner, $msg ) = $Ticket->CurrentUserCanSetOwner();
+
+my $can_modify_people = $can_set_owner
                      || $Ticket->CurrentUserHasRight('Watch')
                      || $Ticket->CurrentUserHasRight('WatchAsAdminCc');
 
